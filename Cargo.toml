@@ -1,0 +1,16 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/row",
+    "crates/catalog",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+storage = { git = "https://github.com/n-3-0-l-d-3-v/sietch.git" }
+thiserror = "1"
+proptest = "1"

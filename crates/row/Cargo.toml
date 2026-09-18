@@ -1,0 +1,11 @@
+[package]
+name = "row"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
