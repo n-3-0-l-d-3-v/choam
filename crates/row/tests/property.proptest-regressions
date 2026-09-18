@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc d004582dcab745946e4d32162b03cc71cde409b0917e0181bf9b129e1218e929 # shrinks to table_a = 0, table_b = 1, (ty_a, pk_a) = (Boolean, Boolean(true)), (ty_b, pk_b) = (Boolean, Boolean(true))
