@@ -1,8 +1,10 @@
-//! Serializes a `(table_id, Schema)` pair for storage as a catalog
-//! entry's value blob. Deliberately hand-rolled and independent of
-//! `row::encode_row`/`decode_row` (which encode a table's *data* rows
-//! against a schema already known) — the catalog entry *is* the schema,
-//! so nothing here can depend on already having one.
+//! Serializes catalog entries for storage as value blobs: a
+//! `(table_id, Schema)` pair for one table's entry, and a plain list of
+//! table names for the index (ticket 002 — see `catalog.rs`). Both are
+//! deliberately hand-rolled and independent of `row::encode_row`/
+//! `decode_row` (which encode a table's *data* rows against a schema
+//! already known) — these entries either *are* the schema or describe
+//! what schemas exist, so nothing here can depend on already having one.
 
 use row::{ColumnDef, ColumnType, Schema, SchemaError};
 
@@ -100,6 +102,32 @@ pub fn decode_table_entry(data: &[u8]) -> Result<(u32, Schema), CatalogCodecErro
     Ok((table_id, schema))
 }
 
+/// Encodes the catalog's table-name index (ticket 002): a plain count-
+/// prefixed list of names, in whatever order they were given.
+pub fn encode_table_index(names: &[String]) -> Vec<u8> {
+    let mut out = Vec::new();
+    out.extend_from_slice(&(names.len() as u32).to_le_bytes());
+    for name in names {
+        write_string(&mut out, name);
+    }
+    out
+}
+
+pub fn decode_table_index(data: &[u8]) -> Result<Vec<String>, CatalogCodecError> {
+    if data.len() < 4 {
+        return Err(CatalogCodecError::Truncated);
+    }
+    let count = u32::from_le_bytes(data[0..4].try_into().unwrap()) as usize;
+    let mut rest = &data[4..];
+    let mut names = Vec::with_capacity(count);
+    for _ in 0..count {
+        let (name, after) = read_string(rest)?;
+        names.push(name.to_string());
+        rest = after;
+    }
+    Ok(names)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,5 +180,25 @@ mod tests {
             decode_table_entry(&encoded),
             Err(CatalogCodecError::UnknownTypeTag(255))
         );
+    }
+
+    #[test]
+    fn table_index_round_trips_including_empty() {
+        for names in [
+            vec![],
+            vec!["a".to_string()],
+            vec!["users".to_string(), "orders".to_string(), "".to_string()],
+        ] {
+            let encoded = encode_table_index(&names);
+            assert_eq!(decode_table_index(&encoded).unwrap(), names);
+        }
+    }
+
+    #[test]
+    fn table_index_decode_rejects_truncated_input() {
+        let encoded = encode_table_index(&["users".to_string(), "orders".to_string()]);
+        for cut in 0..encoded.len() {
+            assert!(decode_table_index(&encoded[..cut]).is_err(), "cut at {cut}");
+        }
     }
 }
