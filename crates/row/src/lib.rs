@@ -7,8 +7,8 @@ mod row;
 mod value;
 
 pub use key::{
-    catalog_counter_key, catalog_table_key, row_key, row_key_prefix, CATALOG_NAMESPACE,
-    ROW_NAMESPACE,
+    catalog_counter_key, catalog_index_key, catalog_table_key, decode_key_component, row_key,
+    row_key_prefix, split_row_key, CATALOG_NAMESPACE, ROW_NAMESPACE,
 };
 pub use row::{decode_row, encode_row, ColumnDef, RowError, Schema, SchemaError};
 pub use value::{decode_value, encode_value, ColumnType, Value, ValueError};
