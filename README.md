@@ -16,9 +16,28 @@ repo commit-for-commit.
 **Phase 6 — ACTIVE.** See [docs/design/DATABASE.md](docs/design/DATABASE.md)
 for the layer map and what checking `sietch`'s actual code (rather than
 assuming) showed: PUT/GET/DELETE/SCAN/SNAPSHOT and real Snapshot
-Isolation already exist there (Phase 2, tickets 002 and 007). Ticket 001
-(row encoding and catalog) and ticket 002 (relational transactions) are
-scoped and open; see [tickets/](tickets/).
+Isolation already exist there (Phase 2, tickets 002 and 007).
+
+**Ticket 001 (row encoding and catalog) is done.** `crates/row`: two
+disjoint key namespaces (catalog vs. row data) distinguished by their
+first byte; row keys use a fixed-width, catalog-assigned `table_id`
+rather than the table's own name, specifically so one table's name can
+never be a byte-prefix of another's row keys (`"users"` vs. `"users2"`).
+Primary keys are encoded order-preserving (sign-flipped big-endian
+integers, raw bytes for text/bytes); row values use an ordinary
+length-prefixed codec — two distinct encodings of the same `Value` type,
+on purpose. `crates/catalog`: table schemas are stored as ordinary rows
+in the same `sietch::Store`, under the reserved namespace — `CREATE
+TABLE` gets exactly sietch's own crash-safety and versioning for free,
+with no separate metadata file, which is this ticket's concrete answer
+to the phase's research question at this layer. A property-design
+mistake was caught before it shipped: an early version of the
+same-table key-collision property drew two primary keys of
+*independently* arbitrary types, which could fail on a coincidental
+encoding collision no real table (which has exactly one primary-key
+type) could ever produce — fixed to draw both from one chosen type.
+32 unit tests, 5 property tests, all mutation-checked. See
+[ADR-001](docs/design/decisions/ADR-001-row-encoding-and-catalog.md).
 
 See [tickets/](tickets/) for the live phase-by-phase ticket board and
 [docs/design/](docs/design/) for constraints, invariants and architecture
