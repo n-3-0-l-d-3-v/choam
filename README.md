@@ -13,7 +13,12 @@ repo commit-for-commit.
 
 ## Status
 
-**Phase 6 — QUEUED**
+**Phase 6 — ACTIVE.** See [docs/design/DATABASE.md](docs/design/DATABASE.md)
+for the layer map and what checking `sietch`'s actual code (rather than
+assuming) showed: PUT/GET/DELETE/SCAN/SNAPSHOT and real Snapshot
+Isolation already exist there (Phase 2, tickets 002 and 007). Ticket 001
+(row encoding and catalog) and ticket 002 (relational transactions) are
+scoped and open; see [tickets/](tickets/).
 
 See [tickets/](tickets/) for the live phase-by-phase ticket board and
 [docs/design/](docs/design/) for constraints, invariants and architecture
