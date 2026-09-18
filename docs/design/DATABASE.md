@@ -38,11 +38,11 @@ actually hold once real rows, not raw byte blobs, are involved."
 crates/row       -- row/value encoding on top of sietch's byte keys and
                      values: a table+primary-key encoding scheme for
                      Store's key space, typed column values, row
-                     (de)serialization (ticket 001)
+                     (de)serialization (ticket 001, DONE)
 crates/catalog   -- schema storage: table/column definitions themselves
                      live in sietch too (a reserved key range), so
                      schema changes get the same crash-safety and
-                     snapshot isolation as data (ticket 001/002)
+                     snapshot isolation as data (ticket 001, DONE)
 crates/txn       -- the relational transaction API wired onto
                      sietch::TransactionalStore; whatever isolation gap
                      exists between "byte-key snapshot isolation" and
