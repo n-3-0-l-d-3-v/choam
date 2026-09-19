@@ -50,7 +50,7 @@ crates/txn       -- the relational transaction API wired onto
                      proven here (ticket 002, DONE)
 crates/sql       -- a constrained SQL subset: lexer/parser -> a small
                      logical plan -> execution against crates/row+txn.
-                     Built bottom-up (ticket 003+), scope narrowed
+                     Lexer/parser DONE (ticket 003); executor next. Built bottom-up (ticket 003+), scope narrowed
                      deliberately (see SCOPE.md) rather than chasing SQL
                      completeness
 crates/cli       -- a real CLI/REPL (`choamc`), mirroring every other

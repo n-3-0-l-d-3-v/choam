@@ -55,6 +55,14 @@ writes; SI's write-skew gap is stated, not hidden) and a differential
 test against a `HashMap`, both mutation-checked. See
 [ADR-002](docs/design/decisions/ADR-002-relational-transactions.md).
 
+**Ticket 003 (SQL lexer and parser) is done.** `crates/sql`: a hand-written
+lexer and precedence-climbing parser for a small SQL subset, producing a
+real AST (the opposite choice from chakobsa, for stated reasons). The
+renderer fully parenthesizes, so a property test proves
+`parse(render(ast)) == ast` for arbitrary statements; the parser never
+panics on arbitrary or SQL-shaped garbage. See
+[ADR-003](docs/design/decisions/ADR-003-sql-parser.md).
+
 See [tickets/](tickets/) for the live phase-by-phase ticket board and
 [docs/design/](docs/design/) for constraints, invariants and architecture
 decision records.

@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 phase: 6
 ---
 
@@ -11,3 +11,9 @@ phase: 6
 - Expressions: integer/string/boolean/NULL literals, columns, + - * /, comparisons, AND/OR/NOT, IS [NOT] NULL, parentheses.
 - Typed errors carrying a byte position; never panic on arbitrary input.
 - Property tests: arbitrary text never panics; render(AST) -> parse round-trips for arbitrary ASTs.
+
+## Done
+- [x] Lexer (byte-positioned typed errors) and recursive-descent parser with precedence climbing
+- [x] All statement kinds and expression forms in scope
+- [x] Unit tests, 3 property tests (round trip, no panics on arbitrary and SQL-shaped input), mutation-checked
+- [x] ADR-003
