@@ -19,8 +19,8 @@
 
 use catalog::{Catalog, CatalogError, TableHandle};
 use row::{
-    decode_key_component, decode_row, encode_row, row_key, split_row_key, RowError, Value,
-    ValueError,
+    decode_key_component, decode_row, encode_row, row_key, row_key_prefix, split_row_key, RowError,
+    Value, ValueError,
 };
 use storage::TxnError;
 
@@ -138,11 +138,27 @@ impl RelTransaction<'_> {
         }
     }
 
+    /// Every row of `table` as this transaction sees it (snapshot plus its
+    /// own buffered writes), in primary-key order.
+    pub fn scan(&self, table: &str) -> Result<Vec<Vec<Value>>, DbError> {
+        let handle = self.db.table_handle(table)?;
+        self.inner
+            .scan(&row_key_prefix(handle.table_id))
+            .into_iter()
+            .map(|(_, bytes)| Ok(decode_row(&handle.schema, &bytes)?))
+            .collect()
+    }
+
     /// Buffers a whole-row write (insert or overwrite), keyed by
     /// `values`'s primary-key column.
     pub fn write(&mut self, table: &str, values: &[Value]) -> Result<(), DbError> {
         let handle = self.db.table_handle(table)?;
-        let pk = &values[handle.schema.primary_key];
+        let pk = values
+            .get(handle.schema.primary_key)
+            .ok_or(RowError::ColumnCountMismatch {
+                expected: handle.schema.columns.len(),
+                found: values.len(),
+            })?;
         let key = row_key(handle.table_id, pk, handle.schema.primary_key_type())?;
         let encoded = encode_row(&handle.schema, values)?;
         self.inner.put(key, encoded);
@@ -401,5 +417,49 @@ mod tests {
             txn.read("users", &Value::Integer(1)).unwrap().unwrap(),
             vec![Value::Integer(1), Value::Text("alice".into())]
         );
+    }
+
+    #[test]
+    fn scan_sees_own_writes_deletes_and_only_its_table() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = Database::open(dir.path()).unwrap();
+        db.create_table("a", cols(), 0).unwrap();
+        db.create_table("b", cols(), 0).unwrap();
+        let mut t = db.begin();
+        for i in [3, 1, 2] {
+            t.write("a", &[Value::Integer(i), Value::Text(format!("a{i}"))])
+                .unwrap();
+        }
+        t.write("b", &[Value::Integer(9), Value::Null]).unwrap();
+        t.commit().unwrap();
+        let mut t = db.begin();
+        t.delete("a", &Value::Integer(2)).unwrap();
+        t.write("a", &[Value::Integer(0), Value::Null]).unwrap();
+        let ids: Vec<Value> = t
+            .scan("a")
+            .unwrap()
+            .into_iter()
+            .map(|r| r[0].clone())
+            .collect();
+        assert_eq!(
+            ids,
+            vec![Value::Integer(0), Value::Integer(1), Value::Integer(3)]
+        );
+        assert_eq!(t.scan("b").unwrap().len(), 1);
+    }
+
+    #[test]
+    fn writing_a_row_shorter_than_the_primary_key_index_is_an_error_not_a_panic() {
+        let dir = tempfile::tempdir().unwrap();
+        let db = Database::open(dir.path()).unwrap();
+        let mut c = cols();
+        c.reverse();
+        db.create_table("t", c, 1).unwrap();
+        let mut txn = db.begin();
+        assert!(matches!(
+            txn.write("t", &[Value::Null]),
+            Err(DbError::Row(RowError::ColumnCountMismatch { .. }))
+        ));
+        assert!(txn.write("t", &[]).is_err());
     }
 }
