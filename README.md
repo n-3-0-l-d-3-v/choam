@@ -39,6 +39,22 @@ type) could ever produce — fixed to draw both from one chosen type.
 32 unit tests, 5 property tests, all mutation-checked. See
 [ADR-001](docs/design/decisions/ADR-001-row-encoding-and-catalog.md).
 
+**Ticket 002 (relational transactions) is done.** `crates/txn`:
+`Database::begin` starts a `RelTransaction` (read/write/delete/commit/
+abort by table name and primary key), a thin translation over one
+`sietch::Transaction`, so multi-row, multi-table commits are atomic and
+Snapshot Isolation with first-committer-wins is inherited unchanged.
+Conflicts surface as `DbError::Conflict { table, pk }`. Checking
+assumptions first found that `TransactionalStore` has no `scan` and that
+the catalog and row data must share one store handle, so the catalog
+moved onto `TransactionalStore` with an explicit, transactionally
+maintained table-name index (a disclosed behavior change: concurrent
+`CREATE TABLE` can now conflict and must be retried). Tests: a
+concurrent-commit property test checked against a serial replay (blind
+writes; SI's write-skew gap is stated, not hidden) and a differential
+test against a `HashMap`, both mutation-checked. See
+[ADR-002](docs/design/decisions/ADR-002-relational-transactions.md).
+
 See [tickets/](tickets/) for the live phase-by-phase ticket board and
 [docs/design/](docs/design/) for constraints, invariants and architecture
 decision records.

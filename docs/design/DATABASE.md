@@ -47,7 +47,7 @@ crates/txn       -- the relational transaction API wired onto
                      sietch::TransactionalStore; whatever isolation gap
                      exists between "byte-key snapshot isolation" and
                      "row/statement-level isolation" gets closed and
-                     proven here (ticket 002)
+                     proven here (ticket 002, DONE)
 crates/sql       -- a constrained SQL subset: lexer/parser -> a small
                      logical plan -> execution against crates/row+txn.
                      Built bottom-up (ticket 003+), scope narrowed
