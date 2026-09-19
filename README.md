@@ -13,7 +13,7 @@ repo commit-for-commit.
 
 ## Status
 
-**Phase 6 — ACTIVE.** See [docs/design/DATABASE.md](docs/design/DATABASE.md)
+**Phase 6 — COMPLETE.** See [docs/design/DATABASE.md](docs/design/DATABASE.md)
 for the layer map and what checking `sietch`'s actual code (rather than
 assuming) showed: PUT/GET/DELETE/SCAN/SNAPSHOT and real Snapshot
 Isolation already exist there (Phase 2, tickets 002 and 007).
@@ -71,6 +71,15 @@ and exposed a latent panic in `txn`. The differential test against an
 independent reference model caught a real bug (type errors that depended
 on whether rows existed), now fixed. See
 [ADR-004](docs/design/decisions/ADR-004-sql-executor.md).
+
+**Ticket 005 (shell, workload, measurements) is done — Phase 6 is complete.**
+`choamc` is a real SQL shell (`cargo run -p choamc -- --dir ./mydb`), tested
+as a real binary. A concurrent bank-transfer workload proves no lost updates
+under real contention (290 conflicts retried, money conserved). Measured:
+point lookup ~2.9us vs ~1.9ms scan; batching is ~100x cheaper per row than
+autocommit; append-only versions cost the scan nothing at this size (larger
+scales not yet measured). See
+[ADR-005](docs/design/decisions/ADR-005-shell-workload-and-measurements.md).
 
 See [tickets/](tickets/) for the live phase-by-phase ticket board and
 [docs/design/](docs/design/) for constraints, invariants and architecture
