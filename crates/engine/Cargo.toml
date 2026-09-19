@@ -1,0 +1,16 @@
+[package]
+name = "engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+catalog = { path = "../catalog" }
+row = { path = "../row" }
+sql = { path = "../sql" }
+txn = { path = "../txn" }
+thiserror.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tempfile = "3"
