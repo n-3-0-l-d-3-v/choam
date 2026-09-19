@@ -4,6 +4,7 @@ members = [
     "crates/row",
     "crates/catalog",
     "crates/txn",
+    "crates/sql",
 ]
 
 [workspace.package]
