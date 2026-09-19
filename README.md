@@ -63,6 +63,15 @@ renderer fully parenthesizes, so a property test proves
 panics on arbitrary or SQL-shaped garbage. See
 [ADR-003](docs/design/decisions/ADR-003-sql-parser.md).
 
+**Ticket 004 (SQL executor) is done.** `crates/engine`: autocommit and
+explicit BEGIN/COMMIT/ROLLBACK sessions, SQL three-valued logic, point
+lookup vs full scan, and a static type checker. Building it needed a
+capability sietch lacked (`Transaction::scan`, added as sietch ticket 014)
+and exposed a latent panic in `txn`. The differential test against an
+independent reference model caught a real bug (type errors that depended
+on whether rows existed), now fixed. See
+[ADR-004](docs/design/decisions/ADR-004-sql-executor.md).
+
 See [tickets/](tickets/) for the live phase-by-phase ticket board and
 [docs/design/](docs/design/) for constraints, invariants and architecture
 decision records.
