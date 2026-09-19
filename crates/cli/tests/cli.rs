@@ -42,7 +42,7 @@ fn a_session_over_stdin_prints_tables_and_counts() {
     assert_eq!(
         text(&o.stdout),
         "OK\n2 rows affected\n\
-         id | name  | age\n---+-------+----\n1  | ada   | 36\n2  | grace | NULL\n(2 rows)\n\
+         id | name  | age\n---+-------+-----\n1  | ada   | 36\n2  | grace | NULL\n(2 rows)\n\
          1 row affected\n\
          name  | age\n------+----\ngrace | 85\n(1 row)\n"
     );
