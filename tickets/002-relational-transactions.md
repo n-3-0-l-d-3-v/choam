@@ -1,5 +1,5 @@
 ---
-status: open
+status: done
 phase: 6
 ---
 
@@ -31,5 +31,11 @@ underlying byte-key level.
   behind a mutex, or similar) applying the same serial ordering; final
   state must match.
 
-Not started. Depends on ticket 001 and `sietch::TransactionalStore`
-(already complete, Phase 2, ticket 007).
+## Done
+- [x] Relational transaction API (`txn::Database::begin` -> `RelTransaction`: read/write/delete/commit/abort) over `sietch::Transaction`
+- [x] Multi-row, multi-table transactions commit or abort as one unit
+- [x] Conflicts surfaced as `DbError::Conflict { table, pk }`
+- [x] Property test: concurrent commits match a serial replay in commit order (blind writes; see ADR-002 for scope)
+- [x] Differential test against a `HashMap` reference model
+- [x] Mutation-checked both tests
+- [x] ADR-002 written (shared TransactionalStore, catalog index instead of scan)
